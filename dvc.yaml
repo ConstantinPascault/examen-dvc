@@ -1,0 +1,44 @@
+stages:
+  prepare:
+    cmd: python src/data/make_dataset.py
+    deps:
+    - data/raw
+    - src/data/make_dataset.py
+    outs:
+    - data/processed
+  normalize:
+    cmd: python src/data/make_dataset_scaled.py
+    deps:
+    - data/processed
+    - src/data/make_dataset_scaled.py
+    outs:
+    - data/normalized
+  gridsearch_params:
+    cmd: python src/models/gridsearch_params.py
+    deps:
+    - data/normalized
+    - data/processed
+    - src/models/gridsearch_params.py
+    outs:
+    - models/best_params.pkl
+  train:
+    cmd: python src/models/train_model.py
+    deps:
+    - data/normalized
+    - data/processed
+    - models/best_params.pkl
+    - src/models/train_model.py
+    outs:
+    - models/trained_model.pkl
+  evaluate:
+    cmd: python src/models/evaluate_model.py
+    deps:
+    - data/normalized
+    - data/processed
+    - models/trained_model.pkl
+    - src/models/evaluate_model.py
+    outs:
+    - data/predictions
+    metrics:
+    - metrics/scores.json:
+        cache: false
